@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- 
+    ========================================================================
+    Document: index.html
+    Description: Main markup structure for the Space Theme Spin Wheel & Give Group app.
+    Contains structural layouts for navigation, tabs (Home, Main, Setting), modals,
+    and localized text attributes for multi-language support (ID / EN).
+    ========================================================================
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spin wheel - Space</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="/icon.png" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Background Cosmic Star Animation Layers -->
+  <div class="stars" id="stars1"></div>
+  <div class="stars2" id="stars2"></div>
+
+  <!-- Interactive Shooting Stars (Toggleable via Settings) -->
+  <div class="shooting-star" data-star></div>
+  <div class="shooting-star" data-star></div>
+  <div class="shooting-star" data-star></div>
+
+  <!-- Top-Left App Branding Label -->
+  <div class="label" data-i18n="app-title">SPIN WHEEL</div>
+
+  <!-- Top-Right Navigation Hamburger & Dropdown Menu Container -->
+  <div class="menu-container">
+    <div class="hamburger" id="hamburger" title="Toggle Navigation Menu">
+      <span class="line line-1"></span>
+      <span class="line line-2"></span>
+      <span class="line line-3"></span>
+    </div>
+
+    <div class="dropdown-scroll" id="dropdown">
+      <div class="scroll-content">
+        <ul class="nav-tabs">
+          <li class="tab-item">
+            <a href="#" class="tab-link active" data-target="content-home">
+              <i data-lucide="home"></i>
+              <span data-i18n="nav-home">Home</span>
+            </a>
+          </li>
+          <li class="tab-item">
+            <a href="#" class="tab-link" data-target="content-main" id="btn-spin">
+              <i data-lucide="play"></i>
+              <span data-i18n="nav-main">main</span>
+            </a>
+          </li>
+          <li class="tab-divider"></li>
+          <li class="tab-item">
+            <a href="#" class="tab-link" data-target="content-setting">
+              <i data-lucide="settings"></i>
+              <span data-i18n="nav-setting">setting</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Application Content Area -->
+  <main class="main-content">
+    
+    <!-- HOME TAB PANE -->
+    <section id="content-home" class="tab-pane active" data-tab-content>
+      <div class="home-container">
+        <div class="space-card">
+          <h2 class="card-title" data-i18n="welcome-title">Selamat Datang</h2>
+          <p class="card-desc" data-i18n="welcome-desc">Selamat datang di <a href="https://spinwheel-spc.netlify.app/" target="_blank" class="space-link">https://spinwheel-spc.netlify.app/</a>. Silakan jelajahi setiap sudut antarmuka ini dengan santai dan nikmati pengalaman eksplorasi interaktif yang telah kami siapkan khusus untuk Anda.</p>
+        </div>
+        <div class="space-card">
+          <h2 class="card-title" data-i18n="feature-title">Fitur Unggulan</h2>
+          <p class="card-desc" data-i18n="feature-desc">Aplikasi ini dilengkapi dengan dua fitur utama yang sangat interaktif: Spin Wheel untuk melakukan undian atau gacha acak dengan roda berputar yang dapat disesuaikan persentasenya, serta Give Group untuk membagikan dan mengacak daftar item ke dalam berbagai card grup secara otomatis dan merata.</p>
+          <button class="card-btn" id="go-to-main" type="button" data-i18n="btn-start-wheel">Mulai Spin Wheel</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN TAB PANE (Spin Wheel & Give Group modes) -->
+    <section id="content-main" class="tab-pane" data-tab-content>
+      <div class="main-tab-container">
+        
+        <!-- Mode Selector Card -->
+        <div class="space-card">
+          <label class="mode-label" for="mode-select" data-i18n="mode-select-label">MODE SPIN WHEEL</label>
+          <div class="custom-select-wrapper">
+            <select id="mode-select" class="mode-select">
+              <option value="spin-wheel" selected data-i18n="opt-spin">spin wheel</option>
+              <option value="give-group" data-i18n="opt-group">give group</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- SPIN WHEEL INTERFACE CONTAINER -->
+        <div id="mode-card-spin" class="space-card mode-content-card position-relative">
+          <!-- Wheel Configuration Gear Icon Button (Always top-right) -->
+          <button class="card-gear-icon-only" id="btn-spin-gear" title="Wheel Settings" type="button">
+            <i data-lucide="settings"></i>
+          </button>
+          
+          <div class="spin-layout-wrapper">
+            <div class="wheel-section">
+              <div class="wheel-wrapper">
+                <div class="wheel-dynamic-header" id="wheel-dynamic-header">
+                  <span id="wheel-dynamic-label-text"></span>
+                </div>
+                <div class="wheel-pointer" id="wheel-pointer">
+                  <div class="pointer-detector"></div>
+                </div>
+                <div class="wheel-container">
+                  <canvas id="wheel-canvas" width="300" height="300" title="Click wheel to adjust slice percentages"></canvas>
+                  <div class="hide-roll-overlay" id="hide-roll-overlay">
+                    <div class="hide-roll-box">
+                      <div class="hide-roll-spinner"></div>
+                      <p class="hide-roll-text" data-i18n="spinning-text">SPINNING...</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="input-section">
+              <div class="wheel-label-input-container">
+                <input type="text" id="wheel-card-title-input" class="wheel-card-title-input" placeholder="judul spin wheel" data-i18n-placeholder="placeholder-wheel-label">
+              </div>
+              <textarea id="wheel-item-input" class="card-textarea" placeholder="test 1&#10;test 2" data-i18n-placeholder="placeholder-wheel-items"></textarea>
+            </div>
+          </div>
+
+          <div class="action-button-row">
+            <button class="card-btn square-icon-btn" id="btn-reset-wheel" title="Reset Wheel" type="button">
+              <i data-lucide="refresh-cw"></i>
+            </button>
+            <button class="card-btn spin-action-btn" id="btn-start-spin" type="button" data-i18n="btn-spin-action">SPIN WHEEL</button>
+          </div>
+        </div>
+
+        <!-- GIVE GROUP MODE CONTAINER -->
+        <div id="mode-card-group-container" style="display: none; flex-direction: column; gap: 20px; width: 100%;">
+          
+          <!-- Parent Master Container hosting dynamic output cards -->
+          <div class="space-card group-master-wrapper">
+            <div class="group-master-container" id="group-master-container"></div>
+          </div>
+
+          <!-- Group Input Trigger Control Card -->
+          <div class="space-card group-input-card position-relative">
+            <!-- Group Settings Gear Icon Button -->
+            <button class="card-gear-icon-only" id="btn-group-gear" title="Give Group Settings" type="button">
+              <i data-lucide="settings"></i>
+            </button>
+
+            <h2 class="card-title" data-i18n="group-input-title">GIVE GROUP INPUT</h2>
+            
+            <div class="group-trigger-section">
+              <label class="mode-label" for="group-trigger-input" data-i18n="trigger-label">NAMA JUDUL</label>
+              <input type="text" id="group-trigger-input" class="wheel-card-title-input" placeholder="Masukkan nama judul..." data-i18n-placeholder="placeholder-trigger">
+            </div>
+
+            <div class="group-input-section" style="margin-bottom: 20px;">
+              <label class="mode-label" for="group-item-input" data-i18n="items-label">DAFTAR DATA ISI</label>
+              <textarea id="group-item-input" class="card-textarea" placeholder="test 1&#10;test 2&#10;test 3" data-i18n-placeholder="placeholder-group-items"></textarea>
+            </div>
+
+            <button class="card-btn" id="btn-give-group-action" type="button" style="width: 100%;" data-i18n="btn-group-action">GIVE GROUP</button>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SETTING TAB PANE -->
+    <section id="content-setting" class="tab-pane" data-tab-content>
+      <div class="home-container">
+        
+        <!-- System Configuration & Preferences Card -->
+        <div class="space-card">
+          <h2 class="card-title" data-i18n="setting-title">System Configuration</h2>
+          <div class="setting-controls-stack">
+            <!-- Shooting Star Animation Toggle Checkbox -->
+            <div class="setting-option-row">
+              <label class="checkbox-container">
+                <input type="checkbox" id="checkbox-shooting-star" checked>
+                <span class="checkbox-label-text" data-i18n="setting-star-label">Aktifkan Bintang Jatuh</span>
+              </label>
+            </div>
+            
+            <!-- Language Selector Dropdown (EN / ID) -->
+            <div class="setting-option-row" style="margin-top: 16px;">
+              <label class="mode-label" for="language-select" style="margin-bottom: 8px;" data-i18n="setting-lang-label">BAHASA / LANGUAGE</label>
+              <div class="custom-select-wrapper">
+                <select id="language-select" class="mode-select">
+                  <option value="en" selected>English</option>
+                  <option value="id">Indonesia</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Open Source GitHub Info Card -->
+        <div class="space-card">
+          <h2 class="card-title" data-i18n="github-card-title">Open Source Project</h2>
+          <p class="card-desc" data-i18n="github-card-desc">Proyek ini bersifat open source. Anda dapat melihat, mempelajari, atau berkontribusi pada kode sumber melalui repositori GitHub kami di bawah ini:</p>
+          <a href="https://github.com/the-coder-pro/spin-wheel" target="_blank" class="space-link-btn" data-i18n="github-btn">Kunjungi GitHub Repository</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Result Modal Popup -->
+  <div class="result-modal" id="result-modal">
+    <div class="result-card">
+      <h2 class="card-title" data-i18n="result-title">Hasil Terpilih</h2>
+      <p class="result-text" id="result-text-display"></p>
+      <div class="result-actions">
+        <button class="card-btn" id="btn-result-save" type="button" data-i18n="btn-save">SAVE</button>
+        <button class="card-btn" id="btn-result-close" type="button" data-i18n="btn-close">CLOSE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wheel Settings Modal Popup -->
+  <div class="result-modal" id="setting-modal">
+    <div class="result-card">
+      <h2 class="card-title" data-i18n="wheel-setting-title">WHEEL SETTINGS</h2>
+      <div class="setting-option-row">
+        <label class="checkbox-container">
+          <input type="checkbox" id="checkbox-hide-roll">
+          <span class="checkbox-label-text" data-i18n="hide-roll-label">Hide Roll Cover Wheel</span>
+        </label>
+      </div>
+      <button class="card-btn" id="btn-setting-close" type="button" style="margin-top: 20px;" data-i18n="btn-close">CLOSE</button>
+    </div>
+  </div>
+
+  <!-- Give Group Settings Modal Popup -->
+  <div class="result-modal" id="group-setting-modal">
+    <div class="result-card">
+      <h2 class="card-title" data-i18n="group-setting-title">GROUP SETTINGS</h2>
+      <div class="setting-option-row" style="margin-bottom: 16px;">
+        <label class="mode-label" for="input-group-card-count" style="margin-bottom: 8px;" data-i18n="card-count-label">JUMLAH CARD OUTPUT</label>
+        <input type="number" id="input-group-card-count" class="wheel-card-title-input" value="2" min="1" max="20">
+      </div>
+      <div class="setting-option-row">
+        <label class="mode-label" for="input-max-individu" style="margin-bottom: 8px;" data-i18n="max-individu-label">MAX INDIVIDU PER CARD</label>
+        <input type="number" id="input-max-individu" class="wheel-card-title-input" value="3" min="1" max="50">
+      </div>
+      <button class="card-btn" id="btn-group-setting-close" type="button" style="margin-top: 20px; width: 100%;" data-i18n="btn-apply-close">APPLY & CLOSE</button>
+    </div>
+  </div>
+
+  <!-- Wheel Percentage Configuration Modal Popup -->
+  <div class="result-modal" id="percentage-modal">
+    <div class="result-card" style="max-width: 440px;">
+      <h2 class="card-title" data-i18n="percentage-setting-title">WHEEL PERCENTAGE SETTINGS</h2>
+      <p class="card-desc" style="margin-bottom: 12px;" data-i18n="percentage-desc">Masukkan persentase (0 - 100). Nilai lain akan otomatis disesuaikan agar pas 100%.</p>
+      
+      <div class="percentage-list-container" id="percentage-list-container"></div>
+
+      <div class="result-actions percentage-actions-row" style="margin-top: 20px;">
+        <button class="card-btn" id="btn-percentage-save" type="button" data-i18n="btn-apply">APPLY</button>
+        <button class="card-btn" id="btn-percentage-reset" type="button" data-i18n="btn-reset">RESET</button>
+        <button class="card-btn" id="btn-percentage-close" type="button" data-i18n="btn-close">CLOSE</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="ui.js"></script>
+</body>
+</html>
