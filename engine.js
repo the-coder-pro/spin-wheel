@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "nav-main": "main",
       "nav-setting": "setting",
       "welcome-title": "Welcome",
-      "welcome-desc": "Welcome to https://spinwheel-spc.netlify.app/. Please explore every corner of this interface smoothly and enjoy the interactive exploration experience we have prepared for you.",
+      "welcome-desc": "Welcome to https://spinwheel-spc.vercel.app/. Please explore every corner of this interface smoothly and enjoy the interactive exploration experience we have prepared for you.",
       "feature-title": "Core Features",
       "feature-desc": "This app features two highly interactive tools: Spin Wheel for random gacha draws with adjustable slice percentages, and Give Group to shuffle and distribute item lists evenly across multiple group cards automatically.",
       "btn-start-wheel": "Start Spin Wheel",
