@@ -69,8 +69,24 @@ class WheelEngine {
         const endAngle = currentAngle + sliceAngle;
         currentAngle = endAngle;
 
-        const bgColor = total === 1 ? "#ffffff" : (i % 2 === 0 ? "#ffffff" : "#000000");
-        const textColor = total > 1 && i % 2 !== 0 ? "#ffffff" : "#000000";
+        // 3-color wheel: white, black, grey rgb(127.5)
+        let bgColor, textColor;
+        if (total === 1) {
+          bgColor = "#ffffff";
+          textColor = "#000000";
+        } else {
+          const mod = i % 3;
+          if (mod === 0) {
+            bgColor = "#ffffff";
+            textColor = "#000000";
+          } else if (mod === 1) {
+            bgColor = "#000000";
+            textColor = "#ffffff";
+          } else {
+            bgColor = "rgb(127.5, 127.5, 127.5)";
+            textColor = "#000000";
+          }
+        }
         const binaryCode = this.toBinary(i + 1);
 
         slices.push({
@@ -137,6 +153,10 @@ document.addEventListener("DOMContentLoaded", () => {
       "percentage-desc": "Masukkan persentase (0 - 100). Nilai lain akan otomatis disesuaikan agar pas 100%.",
       "btn-apply": "APPLY",
       "btn-reset": "RESET",
+      "btn-clear-title": "HAPUS JUDUL",
+      "btn-clear-items": "HAPUS ITEM",
+      "spin-power-label": "KEKUATAN SPIN (1-10)",
+      "spin-power-desc": "1=x1, 2=x1.5, 3=x2, dst (kali 0.5)",
       "placeholder-empty": "",
       "placeholder-empty-short": ""
     },
@@ -182,6 +202,10 @@ document.addEventListener("DOMContentLoaded", () => {
       "percentage-desc": "Enter percentage (0 - 100). Other values will automatically adjust to total 100%.",
       "btn-apply": "APPLY",
       "btn-reset": "RESET",
+      "btn-clear-title": "CLEAR TITLE",
+      "btn-clear-items": "CLEAR ITEMS",
+      "spin-power-label": "SPIN POWER (1-10)",
+      "spin-power-desc": "1=x1, 2=x1.5, 3=x2, etc (x0.5 multiplier)",
       "placeholder-empty": "",
       "placeholder-empty-short": ""
     }
@@ -209,16 +233,126 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Language selector event listener
+  // Language selector event listener (native + custom dropdown)
   const languageSelect = document.getElementById("language-select");
   if (languageSelect) {
     languageSelect.value = currentLang;
     languageSelect.addEventListener("change", (e) => {
       applyLanguage(e.target.value);
+      // Sync custom lang dropdown trigger text
+      const customLangTriggerText = document.getElementById('custom-lang-trigger-text');
+      const customLangOptions = document.querySelectorAll('#custom-lang-options .custom-dropdown-option');
+      customLangOptions.forEach(opt => {
+        opt.classList.remove('active');
+        if (opt.getAttribute('data-value') === e.target.value) {
+          opt.classList.add('active');
+          if (customLangTriggerText) customLangTriggerText.textContent = opt.textContent;
+        }
+      });
     });
   }
 
   applyLanguage(currentLang);
+
+  // ========================================================================
+  // Custom Language Dropdown - Same style as mode dropdown (white corner, no smooth stroke)
+  // ========================================================================
+  function setupCustomLangDropdown() {
+    const customDropdown = document.getElementById('custom-lang-dropdown');
+    const customTrigger = document.getElementById('custom-lang-trigger');
+    const customTriggerText = document.getElementById('custom-lang-trigger-text');
+    const customOptionsContainer = document.getElementById('custom-lang-options');
+    const customOptions = document.querySelectorAll('#custom-lang-options .custom-dropdown-option');
+    
+    if (!customDropdown || !customTrigger || !customOptionsContainer || customOptions.length === 0) return;
+
+    let focusedIndex = 0;
+    customOptions.forEach((opt, idx) => {
+      if (opt.classList.contains('active')) focusedIndex = idx;
+    });
+
+    const isDesktop = window.matchMedia('(pointer: fine)').matches && 
+                      window.matchMedia('(hover: hover)').matches &&
+                      !('ontouchstart' in window);
+
+    function selectLangOption(index) {
+      customOptions.forEach(o => o.classList.remove('active', 'focused'));
+      const selected = customOptions[index];
+      if (!selected) return;
+      selected.classList.add('active');
+      focusedIndex = index;
+      
+      const value = selected.getAttribute('data-value');
+      if (customTriggerText) customTriggerText.textContent = selected.textContent;
+
+      // Sync native select and trigger change (applies language)
+      if (languageSelect) {
+        languageSelect.value = value;
+        languageSelect.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      customDropdown.classList.remove('open');
+    }
+
+    customTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      customDropdown.classList.toggle('open');
+      if (customDropdown.classList.contains('open')) {
+        customOptions.forEach((o, idx) => {
+          o.classList.remove('focused');
+          if (o.classList.contains('active')) focusedIndex = idx;
+        });
+      }
+    });
+
+    customOptions.forEach((opt, idx) => {
+      opt.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectLangOption(idx);
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!customDropdown.contains(e.target)) {
+        customDropdown.classList.remove('open');
+      }
+    });
+
+    // PC/Laptop Arrow navigation for language dropdown
+    if (isDesktop) {
+      customTrigger.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (!customDropdown.classList.contains('open')) {
+            customDropdown.classList.add('open');
+          }
+          if (e.key === 'ArrowDown') {
+            focusedIndex = (focusedIndex + 1) % customOptions.length;
+          } else {
+            focusedIndex = (focusedIndex - 1 + customOptions.length) % customOptions.length;
+          }
+          customOptions.forEach(o => o.classList.remove('focused'));
+          customOptions[focusedIndex].classList.add('focused');
+          customOptions[focusedIndex].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter') {
+          if (customDropdown.classList.contains('open')) {
+            e.preventDefault();
+            selectLangOption(focusedIndex);
+          } else {
+            customDropdown.classList.add('open');
+          }
+        } else if (e.key === 'Escape') {
+          customDropdown.classList.remove('open');
+        }
+      });
+    }
+
+    if (isDesktop) {
+      customOptionsContainer.setAttribute('tabindex', '0');
+    }
+  }
+
+  setupCustomLangDropdown();
 
   // Shooting star animation toggle control
   const checkboxShootingStar = document.getElementById("checkbox-shooting-star");
@@ -384,6 +518,184 @@ document.addEventListener("DOMContentLoaded", () => {
       updateScrollBounds();
     });
   }
+
+  // ========================================================================
+  // Custom Dropdown - Mode Spin Wheel / Give Group (Not Browser Native)
+  // White corner, no smooth stroke (border-radius 0), sharp white border
+  // PC/Laptop Arrow ↑↓ navigates options
+  // ========================================================================
+  function setupCustomModeDropdown() {
+    const customDropdown = document.getElementById('custom-mode-dropdown');
+    const customTrigger = document.getElementById('custom-mode-trigger');
+    const customTriggerText = document.getElementById('custom-mode-trigger-text');
+    const customOptionsContainer = document.getElementById('custom-mode-options');
+    const customOptions = document.querySelectorAll('.custom-dropdown-option');
+    
+    if (!customDropdown || !customTrigger || !customOptionsContainer || customOptions.length === 0) return;
+
+    let focusedIndex = 0;
+    // Find current active index
+    customOptions.forEach((opt, idx) => {
+      if (opt.classList.contains('active')) focusedIndex = idx;
+    });
+
+    // Detect PC/Laptop for arrow navigation (no mobile conflict)
+    const isDesktop = window.matchMedia('(pointer: fine)').matches && 
+                      window.matchMedia('(hover: hover)').matches &&
+                      !('ontouchstart' in window);
+
+    function selectOption(index) {
+      customOptions.forEach(o => o.classList.remove('active', 'focused'));
+      const selected = customOptions[index];
+      if (!selected) return;
+      selected.classList.add('active');
+      focusedIndex = index;
+      
+      // Update trigger text with translation support
+      const value = selected.getAttribute('data-value');
+      const key = selected.getAttribute('data-i18n');
+      // Use current language dict for text if available
+      if (key) {
+        const dict = translations[currentLang] || translations['en'];
+        if (dict[key]) {
+          customTriggerText.textContent = dict[key];
+        } else {
+          customTriggerText.textContent = selected.textContent;
+        }
+      } else {
+        customTriggerText.textContent = selected.textContent;
+      }
+
+      // Sync native select and trigger change
+      if (modeSelect) {
+        modeSelect.value = value;
+        modeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      customDropdown.classList.remove('open');
+    }
+
+    // Trigger click toggles dropdown
+    customTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      customDropdown.classList.toggle('open');
+      if (customDropdown.classList.contains('open')) {
+        // Reset focused to active when opened
+        customOptions.forEach((o, idx) => {
+          o.classList.remove('focused');
+          if (o.classList.contains('active')) focusedIndex = idx;
+        });
+      }
+    });
+
+    // Option clicks
+    customOptions.forEach((opt, idx) => {
+      opt.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectOption(idx);
+      });
+    });
+
+    // Click outside closes
+    document.addEventListener('click', (e) => {
+      if (!customDropdown.contains(e.target)) {
+        customDropdown.classList.remove('open');
+      }
+    });
+
+    // PC/Laptop Arrow ↑↓ navigation for dropdown options
+    if (isDesktop) {
+      customTrigger.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (!customDropdown.classList.contains('open')) {
+            customDropdown.classList.add('open');
+          }
+          // Move focus
+          if (e.key === 'ArrowDown') {
+            focusedIndex = (focusedIndex + 1) % customOptions.length;
+          } else {
+            focusedIndex = (focusedIndex - 1 + customOptions.length) % customOptions.length;
+          }
+          customOptions.forEach(o => o.classList.remove('focused'));
+          customOptions[focusedIndex].classList.add('focused');
+          customOptions[focusedIndex].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter') {
+          if (customDropdown.classList.contains('open')) {
+            e.preventDefault();
+            selectOption(focusedIndex);
+          } else {
+            customDropdown.classList.add('open');
+          }
+        } else if (e.key === 'Escape') {
+          customDropdown.classList.remove('open');
+        }
+      });
+
+      // Also allow arrow navigation when options container focused
+      customOptionsContainer.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (e.key === 'ArrowDown') {
+            focusedIndex = (focusedIndex + 1) % customOptions.length;
+          } else {
+            focusedIndex = (focusedIndex - 1 + customOptions.length) % customOptions.length;
+          }
+          customOptions.forEach(o => o.classList.remove('focused'));
+          customOptions[focusedIndex].classList.add('focused');
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          selectOption(focusedIndex);
+        }
+      });
+    }
+
+    // Make options container focusable for keyboard on PC
+    if (isDesktop) {
+      customOptionsContainer.setAttribute('tabindex', '0');
+    }
+
+    // Sync initial trigger text with active option and current language
+    const activeOpt = document.querySelector('.custom-dropdown-option.active');
+    if (activeOpt && customTriggerText) {
+      const key = activeOpt.getAttribute('data-i18n');
+      if (key) {
+        const dict = translations[currentLang] || translations['en'];
+        if (dict[key]) customTriggerText.textContent = dict[key];
+      }
+    }
+
+    // Update trigger text on language change - hook into applyLanguage
+    const originalApplyLanguage = applyLanguage;
+    // We will wrap applyLanguage to also update custom dropdown texts
+    window._customDropdownUpdate = function(lang) {
+      const dict = translations[lang] || translations['en'];
+      // Update all custom options that have data-i18n
+      customOptions.forEach(opt => {
+        const k = opt.getAttribute('data-i18n');
+        if (k && dict[k]) {
+          // Preserve active trigger text sync
+          if (opt.classList.contains('active') && customTriggerText) {
+            customTriggerText.textContent = dict[k];
+          }
+        }
+      });
+    };
+  }
+
+  setupCustomModeDropdown();
+
+  // Wrap applyLanguage to also update custom dropdown after original
+  const _origApplyLanguage = applyLanguage;
+  applyLanguage = function(lang) {
+    _origApplyLanguage(lang);
+    // Update custom dropdown texts
+    const customDropdown = document.getElementById('custom-mode-dropdown');
+    if (customDropdown && window._customDropdownUpdate) {
+      window._customDropdownUpdate(lang);
+    }
+  };
+
 
   // Dynamic Wheel Title Header Input Handler
   if (wheelCardTitleInput && wheelDynamicHeader && wheelDynamicLabelText && modeCardSpin && wheelWrapper) {
@@ -814,8 +1126,18 @@ document.addEventListener("DOMContentLoaded", () => {
   if (resetWheelBtn) {
     resetWheelBtn.addEventListener("click", () => {
       if (isSpinning) return;
+      // Clear items
       if (wheelTextarea) {
         wheelTextarea.value = "";
+      }
+      // Clear title as requested
+      const titleInput = document.getElementById('wheel-card-title-input');
+      if (titleInput) {
+        titleInput.value = "";
+      }
+      const dynamicLabel = document.getElementById('wheel-dynamic-label-text');
+      if (dynamicLabel) {
+        dynamicLabel.textContent = "";
       }
       engine.customPercentages = {};
       currentRotation = 0;
@@ -840,7 +1162,8 @@ document.addEventListener("DOMContentLoaded", () => {
         hideRollOverlay.classList.add("show");
       }
 
-      let speed = 1.6 + Math.random() * 0.9;
+      const powerMult = getSpinPowerMultiplier();
+      let speed = (1.6 + Math.random() * 0.9) * powerMult;
       const deceleration = 0.985;
       const minSpeed = 0.0005;
 
@@ -920,57 +1243,221 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   // ========================================================================
-  // Arrow Key Scroll Handling - Exit input on arrow keys and scroll
-  // When user presses ↑↓←→ inside any input/textarea, blur and scroll
+  // PC/Laptop Scroll System - Fixed for Popup Scroll (Not Nyasar to Main)
+  // - When popup with scroll open, ↑↓ and mouse wheel scroll popup, not main
+  // - When no popup, scroll active tab pane
+  // - Mouse wheel support for PC/laptop
   // ========================================================================
+  function getActiveScrollableContainer() {
+    // If any modal is open with scrollable content, return its scrollable element
+    const openModal = document.querySelector('.result-modal.show');
+    if (openModal) {
+      // Priority: percentage list, group output, result card scroll, modal itself
+      const scrollableSelectors = [
+        '.percentage-list-container',
+        '.group-output-content',
+        '.result-card',
+        '.tab-pane.active'
+      ];
+      for (const sel of scrollableSelectors) {
+        const el = openModal.querySelector(sel);
+        if (el && el.scrollHeight > el.clientHeight) {
+          return el;
+        }
+      }
+      // Fallback to modal card
+      const card = openModal.querySelector('.result-card');
+      if (card) return card;
+      return openModal;
+    }
+    // No modal: return active tab pane
+    const activePane = document.querySelector('.tab-pane.active');
+    return activePane || document.querySelector('.main-content') || document.documentElement;
+  }
+
   function setupArrowKeyScroll() {
+    const isDesktop = window.matchMedia('(pointer: fine)').matches && 
+                      window.matchMedia('(hover: hover)').matches &&
+                      !('ontouchstart' in window);
+
+    if (!isDesktop) return;
+
     const inputs = document.querySelectorAll('input, textarea');
-    const scrollContainer = document.querySelector('.main-content');
 
     inputs.forEach(inputEl => {
       inputEl.addEventListener('keydown', (e) => {
-        const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+        const arrowKeys = ['ArrowUp', 'ArrowDown'];
         if (!arrowKeys.includes(e.key)) return;
 
-        // Exit from input
         e.preventDefault();
         inputEl.blur();
 
-        // Scroll amount
-        const scrollAmount = 100;
-        const target = scrollContainer || window;
-        const isWindowScroll = (target === window);
+        const scrollAmount = 120;
+        const target = getActiveScrollableContainer();
+        if (!target) return;
 
-        if (e.key === 'ArrowUp') {
-          if (isWindowScroll) {
-            window.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
-          } else {
-            target.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
+        if (target === document.documentElement || target === window) {
+          window.scrollBy({ top: e.key === 'ArrowUp' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+        } else {
+          target.scrollBy({ top: e.key === 'ArrowUp' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Also handle arrow keys when not in input but popup scroll exists (PC only)
+    document.addEventListener('keydown', (e) => {
+      // Skip if already handled by input or custom dropdown
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      const customDropdownOpen = document.querySelector('.custom-dropdown.open');
+      if (customDropdownOpen) return; // Let dropdown handle its own arrows
+
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        const openModal = document.querySelector('.result-modal.show');
+        if (openModal) {
+          const target = getActiveScrollableContainer();
+          if (target && target !== document.documentElement) {
+            e.preventDefault();
+            const scrollAmount = 80;
+            target.scrollBy({ top: e.key === 'ArrowUp' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
           }
-        } else if (e.key === 'ArrowDown') {
-          if (isWindowScroll) {
-            window.scrollBy({ top: scrollAmount, behavior: 'smooth' });
-          } else {
-            target.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+        }
+      }
+    });
+  }
+
+  setupArrowKeyScroll();
+
+  // ========================================================================
+  // Mouse Wheel Scroll System for PC/Laptop - Uses Mouse Wheel
+  // ========================================================================
+  function setupPCMouseWheelScroll() {
+    const isDesktop = window.matchMedia('(pointer: fine)').matches && 
+                      window.matchMedia('(hover: hover)').matches &&
+                      !('ontouchstart' in window);
+
+    if (!isDesktop) return;
+
+    // Handle wheel on popups - scroll popup, not main
+    document.addEventListener('wheel', (e) => {
+      const openModal = document.querySelector('.result-modal.show');
+      if (openModal) {
+        const target = getActiveScrollableContainer();
+        if (target && target !== document.documentElement) {
+          // Check if target can scroll in wheel direction
+          const canScrollUp = target.scrollTop > 0;
+          const canScrollDown = target.scrollTop + target.clientHeight < target.scrollHeight;
+          
+          if ((e.deltaY < 0 && canScrollUp) || (e.deltaY > 0 && canScrollDown)) {
+            // Scroll the popup container
+            e.preventDefault();
+            target.scrollBy({ top: e.deltaY, behavior: 'auto' });
           }
-        } else if (e.key === 'ArrowLeft') {
-          if (isWindowScroll) {
-            window.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-          } else {
-            target.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-          }
-        } else if (e.key === 'ArrowRight') {
-          if (isWindowScroll) {
-            window.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-          } else {
-            target.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-          }
+        }
+      }
+    }, { passive: false });
+
+    // Enhance main tab pane wheel scrolling for PC
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    tabPanes.forEach(pane => {
+      pane.addEventListener('wheel', (e) => {
+        // Allow native scroll but ensure smooth
+        // No preventDefault needed for main content
+      }, { passive: true });
+    });
+  }
+
+  setupPCMouseWheelScroll();
+
+
+
+  // ========================================================================
+  // Clear Title & Clear Items Buttons - Shared 50/50 above title input
+  // ========================================================================
+  const clearTitleBtn = document.getElementById('btn-clear-title');
+  const clearItemsBtn = document.getElementById('btn-clear-items');
+  const titleInput = document.getElementById('wheel-card-title-input');
+
+  if (clearTitleBtn) {
+    clearTitleBtn.addEventListener('click', () => {
+      if (isSpinning) return;
+      if (titleInput) titleInput.value = '';
+      const dynamicLabel = document.getElementById('wheel-dynamic-label-text');
+      if (dynamicLabel) dynamicLabel.textContent = '';
+    });
+  }
+
+  if (clearItemsBtn) {
+    clearItemsBtn.addEventListener('click', () => {
+      if (isSpinning) return;
+      if (wheelTextarea) {
+        wheelTextarea.value = '';
+        updateEngineText();
+      }
+    });
+  }
+
+  // ========================================================================
+  // Idle Auto Rotation - Slow forever when not spinning, continues from current rotation
+  // ========================================================================
+  let idleRotationActive = true;
+  let idleSpeed = 0.002; // very slow
+  let idleAnimationId = null;
+
+  function startIdleRotation() {
+    function idleLoop() {
+      if (!isSpinning && idleRotationActive) {
+        currentRotation += idleSpeed;
+        renderWheel(currentRotation);
+      }
+      idleAnimationId = requestAnimationFrame(idleLoop);
+    }
+    if (!idleAnimationId) {
+      idleLoop();
+    }
+  }
+
+  // Start idle rotation initially
+  startIdleRotation();
+
+  // ========================================================================
+  // Spin Power Multiplier - Input in wheel settings
+  // Formula: 1=x1, 2=x1.5, 3=x2, etc => multiplier = 0.5*power + 0.5
+  // ========================================================================
+  const spinPowerInput = document.getElementById('input-spin-power');
+  let spinPowerMultiplier = 1;
+
+  function getSpinPowerMultiplier() {
+    if (!spinPowerInput) return 1;
+    const val = parseInt(spinPowerInput.value, 10);
+    if (isNaN(val) || val < 1) return 1;
+    // 1=>1, 2=>1.5, 3=>2, 4=>2.5 etc
+    return 0.5 * val + 0.5;
+  }
+
+  if (spinPowerInput) {
+    spinPowerInput.addEventListener('input', () => {
+      spinPowerMultiplier = getSpinPowerMultiplier();
+    });
+    // Initialize
+    spinPowerMultiplier = getSpinPowerMultiplier();
+  }
+
+  // ========================================================================
+  // Popup Auto Close on Click Outside UI
+  // ========================================================================
+  function setupModalOutsideClose() {
+    const modals = document.querySelectorAll('.result-modal');
+    modals.forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        // If click target is the modal overlay itself (outside card), close it
+        if (e.target === modal) {
+          modal.classList.remove('show');
         }
       });
     });
   }
 
-  setupArrowKeyScroll();
+  setupModalOutsideClose();
 
 
   // Initialize Lucide icons
