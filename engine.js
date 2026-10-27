@@ -1,6 +1,6 @@
 /**
  * ========================================================================
- * Document: ui.js
+ * Document: engine.js
  * Description: Core application logic for the Space Theme Spin Wheel & Give Group.
  * Handles wheel calculations, canvas rendering, animation loops, DOM transitions,
  * group distribution logic with max-individual constraints, and internationalization (i18n).
@@ -917,6 +917,61 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+
+  // ========================================================================
+  // Arrow Key Scroll Handling - Exit input on arrow keys and scroll
+  // When user presses ↑↓←→ inside any input/textarea, blur and scroll
+  // ========================================================================
+  function setupArrowKeyScroll() {
+    const inputs = document.querySelectorAll('input, textarea');
+    const scrollContainer = document.querySelector('.main-content');
+
+    inputs.forEach(inputEl => {
+      inputEl.addEventListener('keydown', (e) => {
+        const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+        if (!arrowKeys.includes(e.key)) return;
+
+        // Exit from input
+        e.preventDefault();
+        inputEl.blur();
+
+        // Scroll amount
+        const scrollAmount = 100;
+        const target = scrollContainer || window;
+        const isWindowScroll = (target === window);
+
+        if (e.key === 'ArrowUp') {
+          if (isWindowScroll) {
+            window.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
+          } else {
+            target.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
+          }
+        } else if (e.key === 'ArrowDown') {
+          if (isWindowScroll) {
+            window.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+          } else {
+            target.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+          }
+        } else if (e.key === 'ArrowLeft') {
+          if (isWindowScroll) {
+            window.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+          } else {
+            target.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+          }
+        } else if (e.key === 'ArrowRight') {
+          if (isWindowScroll) {
+            window.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+          } else {
+            target.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+          }
+        }
+      });
+    });
+  }
+
+  setupArrowKeyScroll();
+
 
   // Initialize Lucide icons
   if (typeof lucide !== "undefined" && lucide.createIcons) {
