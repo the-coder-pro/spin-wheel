@@ -86,14 +86,26 @@
     <section id="content-main" class="tab-pane" data-tab-content>
       <div class="main-tab-container">
         
-        <!-- Mode Selector Card -->
+        <!-- Mode Selector Card - Custom Dropdown (Not Browser Native) -->
         <div class="space-card">
           <label class="mode-label" for="mode-select" data-i18n="mode-select-label">MODE SPIN WHEEL</label>
-          <div class="custom-select-wrapper">
-            <select id="mode-select" class="mode-select">
+          <div class="custom-select-wrapper" id="mode-select-wrapper">
+            <!-- Hidden native select for logic sync -->
+            <select id="mode-select" class="mode-select" style="display: none;">
               <option value="spin-wheel" selected data-i18n="opt-spin">spin wheel</option>
               <option value="give-group" data-i18n="opt-group">give group</option>
             </select>
+            <!-- Custom Dropdown UI - White Corner, No Smooth Stroke -->
+            <div class="custom-dropdown" id="custom-mode-dropdown">
+              <button class="custom-dropdown-trigger" id="custom-mode-trigger" type="button">
+                <span id="custom-mode-trigger-text" data-i18n="opt-spin">spin wheel</span>
+                <span class="custom-dropdown-arrow">▼</span>
+              </button>
+              <div class="custom-dropdown-options" id="custom-mode-options">
+                <div class="custom-dropdown-option active" data-value="spin-wheel" data-i18n="opt-spin">spin wheel</div>
+                <div class="custom-dropdown-option" data-value="give-group" data-i18n="opt-group">give group</div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -125,6 +137,11 @@
               </div>
             </div>
             <div class="input-section">
+              <!-- New: Clear Title & Clear Items Buttons - Shared 50/50 -->
+              <div class="title-clear-row">
+                <button class="card-btn small-clear-btn" id="btn-clear-title" type="button" data-i18n="btn-clear-title">CLEAR TITLE</button>
+                <button class="card-btn small-clear-btn" id="btn-clear-items" type="button" data-i18n="btn-clear-items">CLEAR ITEMS</button>
+              </div>
               <div class="wheel-label-input-container">
                 <input type="text" id="wheel-card-title-input" class="wheel-card-title-input" placeholder="judul spin wheel" data-i18n-placeholder="placeholder-wheel-label">
               </div>
@@ -194,14 +211,26 @@ test 3</textarea>
               </label>
             </div>
             
-            <!-- Language Selector Dropdown (EN / ID) -->
+            <!-- Language Selector Dropdown (EN / ID) - Custom Dropdown Not Browser Native -->
             <div class="setting-option-row" style="margin-top: 16px;">
               <label class="mode-label" for="language-select" style="margin-bottom: 8px;" data-i18n="setting-lang-label">BAHASA / LANGUAGE</label>
-              <div class="custom-select-wrapper">
-                <select id="language-select" class="mode-select">
+              <div class="custom-select-wrapper" id="lang-select-wrapper">
+                <!-- Hidden native select for logic sync -->
+                <select id="language-select" class="mode-select" style="display: none;">
                   <option value="en" selected>English</option>
                   <option value="id">Indonesia</option>
                 </select>
+                <!-- Custom Dropdown UI - White Corner, No Smooth Stroke -->
+                <div class="custom-dropdown" id="custom-lang-dropdown">
+                  <button class="custom-dropdown-trigger" id="custom-lang-trigger" type="button">
+                    <span id="custom-lang-trigger-text">English</span>
+                    <span class="custom-dropdown-arrow">▼</span>
+                  </button>
+                  <div class="custom-dropdown-options" id="custom-lang-options">
+                    <div class="custom-dropdown-option active" data-value="en">English</div>
+                    <div class="custom-dropdown-option" data-value="id">Indonesia</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -238,6 +267,12 @@ test 3</textarea>
           <input type="checkbox" id="checkbox-hide-roll">
           <span class="checkbox-label-text" data-i18n="hide-roll-label">Hide Roll Cover Wheel</span>
         </label>
+      </div>
+      <!-- New: Spin Power Multiplier Input -->
+      <div class="setting-option-row" style="margin-top: 16px;">
+        <label class="mode-label" for="input-spin-power" style="margin-bottom: 8px;" data-i18n="spin-power-label">KEKUATAN SPIN (1-10)</label>
+        <input type="number" id="input-spin-power" class="wheel-card-title-input" value="1" min="1" max="10" step="1">
+        <p class="card-desc" style="font-size: 11px; margin-top: 6px; margin-bottom: 0;" data-i18n="spin-power-desc">1=x1, 2=x1.5, 3=x2, dst (kali 0.5)</p>
       </div>
       <button class="card-btn" id="btn-setting-close" type="button" style="margin-top: 20px;" data-i18n="btn-close">CLOSE</button>
     </div>
