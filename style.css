@@ -396,6 +396,16 @@ body {
   transform: rotate(45deg);
 }
 
+/* Spin Wheel Gear Icon - Horizontal Mode: Move to Left Top Inside Card */
+@media (orientation: landscape) {
+  #mode-card-spin .card-gear-icon-only {
+    right: auto;
+    left: 24px;
+    top: 24px;
+  }
+}
+
+
 /* Hyperlinks and Buttons */
 .space-link {
   color: #fff;
