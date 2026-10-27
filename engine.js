@@ -262,7 +262,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const customTrigger = document.getElementById('custom-lang-trigger');
     const customTriggerText = document.getElementById('custom-lang-trigger-text');
     const customOptionsContainer = document.getElementById('custom-lang-options');
-    const customOptions = document.querySelectorAll('#custom-lang-options .custom-dropdown-option');
+    // Scoped query to prevent tembus to other dropdowns
+    const customOptions = customOptionsContainer ? customOptionsContainer.querySelectorAll('.custom-dropdown-option') : document.querySelectorAll('#custom-lang-options .custom-dropdown-option');
     
     if (!customDropdown || !customTrigger || !customOptionsContainer || customOptions.length === 0) return;
 
@@ -296,6 +297,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     customTrigger.addEventListener('click', (e) => {
       e.stopPropagation();
+      const isOpening = !customDropdown.classList.contains('open');
+      if (isOpening) {
+        closeAllCustomDropdowns(customDropdown);
+      }
       customDropdown.classList.toggle('open');
       if (customDropdown.classList.contains('open')) {
         customOptions.forEach((o, idx) => {
@@ -519,6 +524,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+
+  // ========================================================================
+  // Helper: Close all custom dropdowns to prevent tembus to other dropdowns
+  // ========================================================================
+  function closeAllCustomDropdowns(except = null) {
+    document.querySelectorAll('.custom-dropdown.open').forEach(dd => {
+      if (dd !== except) dd.classList.remove('open');
+    });
+  }
+
   // ========================================================================
   // Custom Dropdown - Mode Spin Wheel / Give Group (Not Browser Native)
   // White corner, no smooth stroke (border-radius 0), sharp white border
@@ -529,7 +544,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const customTrigger = document.getElementById('custom-mode-trigger');
     const customTriggerText = document.getElementById('custom-mode-trigger-text');
     const customOptionsContainer = document.getElementById('custom-mode-options');
-    const customOptions = document.querySelectorAll('.custom-dropdown-option');
+    // Scoped query to prevent tembus to other dropdowns
+    const customOptions = customOptionsContainer ? customOptionsContainer.querySelectorAll('.custom-dropdown-option') : document.querySelectorAll('#custom-mode-options .custom-dropdown-option');
     
     if (!customDropdown || !customTrigger || !customOptionsContainer || customOptions.length === 0) return;
 
@@ -575,9 +591,13 @@ document.addEventListener("DOMContentLoaded", () => {
       customDropdown.classList.remove('open');
     }
 
-    // Trigger click toggles dropdown
+    // Trigger click toggles dropdown - close others to prevent tembus
     customTrigger.addEventListener('click', (e) => {
       e.stopPropagation();
+      const isOpening = !customDropdown.classList.contains('open');
+      if (isOpening) {
+        closeAllCustomDropdowns(customDropdown);
+      }
       customDropdown.classList.toggle('open');
       if (customDropdown.classList.contains('open')) {
         // Reset focused to active when opened
