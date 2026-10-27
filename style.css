@@ -1007,3 +1007,116 @@ body {
   color: #fff;
   text-transform: uppercase;
 }
+
+/* Title Clear Row - 2 Buttons Shared 50/50 Above Title Input */
+.title-clear-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.small-clear-btn {
+  flex: 1;
+  padding: 8px 6px;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+/* Spin Wheel Gear Icon - Horizontal Mode: Move to Left Top Inside Card */
+@media (orientation: landscape) {
+  #mode-card-spin .card-gear-icon-only {
+    right: auto !important;
+    left: 24px !important;
+    top: 24px !important;
+  }
+}
+
+
+
+/* Custom Dropdown - Not Browser Native, White Corner, No Smooth Stroke */
+.custom-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.custom-dropdown-trigger {
+  width: 100%;
+  background: #000;
+  color: #fff;
+  border: 1px solid #fff;
+  border-radius: 0;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-family: 'Space Grotesk', monospace, sans-serif;
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  transition: none;
+}
+
+.custom-dropdown-arrow {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.custom-dropdown.open .custom-dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.custom-dropdown-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #000;
+  border: 1px solid #fff;
+  border-top: none;
+  border-radius: 0;
+  z-index: 50;
+  display: none;
+  flex-direction: column;
+}
+
+.custom-dropdown.open .custom-dropdown-options {
+  display: flex;
+}
+
+.custom-dropdown-option {
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-family: 'Space Grotesk', monospace, sans-serif;
+  color: #fff;
+  background: #000;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  text-align: left;
+  transition: none;
+  border-bottom: 1px solid #222;
+}
+
+.custom-dropdown-option:last-child {
+  border-bottom: none;
+}
+
+.custom-dropdown-option:hover,
+.custom-dropdown-option.focused {
+  background: #fff;
+  color: #000;
+}
+
+.custom-dropdown-option.active {
+  background: #fff;
+  color: #000;
+}
+
