@@ -494,6 +494,10 @@ body {
 }
 
 .custom-select-wrapper {
+  overflow: visible;
+
+  overflow: visible;
+
   position: relative;
   width: 100%;
 }
@@ -1038,6 +1042,12 @@ body {
 .custom-dropdown {
   position: relative;
   width: 100%;
+  z-index: 10;
+  isolation: isolate;
+}
+
+.custom-dropdown.open {
+  z-index: 200;
 }
 
 .custom-dropdown-trigger {
@@ -1059,6 +1069,8 @@ body {
   align-items: center;
   text-align: left;
   transition: none;
+  position: relative;
+  z-index: 1;
 }
 
 .custom-dropdown-arrow {
@@ -1079,9 +1091,10 @@ body {
   border: 1px solid #fff;
   border-top: none;
   border-radius: 0;
-  z-index: 50;
+  z-index: 201;
   display: none;
   flex-direction: column;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.9);
 }
 
 .custom-dropdown.open .custom-dropdown-options {
