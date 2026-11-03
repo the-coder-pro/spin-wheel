@@ -264,7 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const customOptionsContainer = document.getElementById('custom-lang-options');
     // Scoped query to prevent tembus to other dropdowns
     const customOptions = customOptionsContainer ? customOptionsContainer.querySelectorAll('.custom-dropdown-option') : document.querySelectorAll('#custom-lang-options .custom-dropdown-option');
-    
+
     if (!customDropdown || !customTrigger || !customOptionsContainer || customOptions.length === 0) return;
 
     let focusedIndex = 0;
@@ -282,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!selected) return;
       selected.classList.add('active');
       focusedIndex = index;
-      
+
       const value = selected.getAttribute('data-value');
       if (customTriggerText) customTriggerText.textContent = selected.textContent;
 
@@ -546,7 +546,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const customOptionsContainer = document.getElementById('custom-mode-options');
     // Scoped query to prevent tembus to other dropdowns
     const customOptions = customOptionsContainer ? customOptionsContainer.querySelectorAll('.custom-dropdown-option') : document.querySelectorAll('#custom-mode-options .custom-dropdown-option');
-    
+
     if (!customDropdown || !customTrigger || !customOptionsContainer || customOptions.length === 0) return;
 
     let focusedIndex = 0;
@@ -566,7 +566,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!selected) return;
       selected.classList.add('active');
       focusedIndex = index;
-      
+
       // Update trigger text with translation support
       const value = selected.getAttribute('data-value');
       const key = selected.getAttribute('data-i18n');
@@ -810,7 +810,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (giveGroupActionBtn && groupItemInput) {
     giveGroupActionBtn.addEventListener("click", (e) => {
       e.preventDefault();
-      
+
       const raw = groupItemInput.value;
       const lines = raw.split("\n").map(l => l.trim()).filter(l => l.length > 0);
 
@@ -958,7 +958,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (remainingSum < 0) remainingSum = 0;
 
     const otherInputs = Array.from(inputs).filter(inp => inp !== changedInput);
-    
+
     let currentOthersSum = otherInputs.reduce((sum, inp) => {
       let v = parseFloat(inp.value);
       return sum + (isNaN(v) ? 0 : v);
@@ -1096,7 +1096,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (totalSlices > 0) {
       const normalizedAngle = ((-rotationAngle) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-      
+
       let activeIdx = 0;
       for (let i = 0; i < totalSlices; i++) {
         const s = slices[i];
@@ -1197,9 +1197,9 @@ document.addEventListener("DOMContentLoaded", () => {
           isSpinning = false;
           const slicesArr = engine.getSlices();
           const totalSlices = slicesArr.length;
-          
+
           const normalizedAngle = ((-currentRotation) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-          
+
           let winningIdx = 0;
           for (let i = 0; i < totalSlices; i++) {
             const s = slicesArr[i];
@@ -1220,7 +1220,7 @@ document.addEventListener("DOMContentLoaded", () => {
               }
             }
           }
-          
+
           const winningSlice = slicesArr[winningIdx];
           lastWinningText = winningSlice ? winningSlice.text : "Kosong";
 
@@ -1366,7 +1366,7 @@ document.addEventListener("DOMContentLoaded", () => {
           // Check if target can scroll in wheel direction
           const canScrollUp = target.scrollTop > 0;
           const canScrollDown = target.scrollTop + target.clientHeight < target.scrollHeight;
-          
+
           if ((e.deltaY < 0 && canScrollUp) || (e.deltaY > 0 && canScrollDown)) {
             // Scroll the popup container
             e.preventDefault();
