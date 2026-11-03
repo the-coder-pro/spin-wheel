@@ -190,12 +190,12 @@ body {
   position: absolute;
   top: 40px;
   right: 0;
-  width: 200px;
+  width: 240px;
   max-height: 0;
   overflow: hidden;
   background: #0d0d0d;
-  border: 1px solid #222;
-  border-radius: 4px;
+  border: 1px solid #fff;
+  border-radius: 0;
   transform-origin: top center;
   visibility: hidden;
   opacity: 0;
@@ -283,28 +283,42 @@ body {
   height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   padding: 0 20px;
   position: relative;
   z-index: 5;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.main-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background: #ffffff;
 }
 
 .tab-pane {
   display: none;
   width: 100%;
   max-width: 420px;
-  max-height: 85vh;
-  overflow-y: auto;
-  padding-right: 6px;
-  padding-top: 40px;
+  max-height: none;
+  overflow-y: visible;
+  padding-right: 0;
+  padding-top: 80px;
   padding-bottom: 50px;
 }
 
 @media (orientation: landscape) {
   .tab-pane {
     max-width: 760px;
-    max-height: 75vh;
-    padding-top: 30px;
+    max-height: none;
+    padding-top: 70px;
     padding-bottom: 50px;
   }
 }
@@ -1131,5 +1145,54 @@ body {
 .custom-dropdown-option.active {
   background: #fff;
   color: #000;
+}
+
+/* Dropdown Tab Garis 3 - Slightly Enlarged for PC/Laptop Horizontal */
+@media (orientation: landscape) and (min-width: 768px),
+       (hover: hover) and (pointer: fine) and (orientation: landscape) {
+  .hamburger {
+    width: 36px;
+    height: 28px;
+  }
+
+  .line {
+    height: 2.5px;
+  }
+
+  .hamburger.open .line-1 {
+    transform: translateY(12px) rotate(-45deg);
+  }
+
+  .hamburger.open .line-3 {
+    transform: translateY(-12px) rotate(45deg);
+  }
+
+  .dropdown-scroll {
+    width: 280px;
+    top: 46px;
+  }
+
+  .dropdown-scroll.open {
+    max-height: 400px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 255, 255, 0.06);
+  }
+
+  .scroll-content {
+    padding: 20px;
+  }
+
+  .nav-tabs {
+    gap: 14px;
+  }
+
+  .tab-link {
+    font-size: 15px;
+    gap: 12px;
+  }
+
+  .tab-link i {
+    width: 18px;
+    height: 18px;
+  }
 }
 
