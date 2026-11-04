@@ -188,12 +188,12 @@ body {
 /* Dropdown Navigation Panel */
 .dropdown-scroll {
   position: absolute;
-  top: 40px;
+  top: 48px;
   right: 0;
   width: 240px;
   max-height: 0;
   overflow: hidden;
-  background: #0d0d0d;
+  background: #000;
   border: 1px solid #fff;
   border-radius: 0;
   transform-origin: top center;
@@ -455,7 +455,7 @@ body {
 }
 
 .wheel-label-input-container {
-  margin-bottom: 12px;
+  margin-bottom: 20px;
   width: 100%;
 }
 
@@ -503,7 +503,7 @@ body {
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
   color: #fff;
 }
 
@@ -610,12 +610,16 @@ body {
   background: transparent;
 }
 
+
+
+
+
 .wheel-container {
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 12px;
+  margin-top: 20px;
 }
 
 #wheel-canvas {
@@ -740,7 +744,7 @@ body {
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
 }
 
 .card-desc {
@@ -1030,7 +1034,7 @@ body {
 .title-clear-row {
   display: flex;
   gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
   width: 100%;
 }
 
@@ -1106,13 +1110,24 @@ body {
   border-top: none;
   border-radius: 0;
   z-index: 201;
-  display: none;
+  display: flex;
   flex-direction: column;
   box-shadow: 0 8px 20px rgba(0,0,0,0.9);
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-12px);
+  transform-origin: top center;
+  transition: max-height 0.4s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.3s ease, visibility 0.4s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease;
 }
 
 .custom-dropdown.open .custom-dropdown-options {
-  display: flex;
+  max-height: 260px;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 255, 255, 0.05);
 }
 
 .custom-dropdown-option {
@@ -1196,3 +1211,129 @@ body {
   }
 }
 
+
+
+.custom-dropdown.open .custom-dropdown-option {
+  animation: dropdownOptionSlideDown 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+.custom-dropdown.open .custom-dropdown-option:nth-child(1) { animation-delay: 0.05s; }
+.custom-dropdown.open .custom-dropdown-option:nth-child(2) { animation-delay: 0.1s; }
+
+@keyframes dropdownOptionSlideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.custom-dropdown:not(.open) .custom-dropdown-option {
+  animation: none;
+  opacity: 1;
+}
+
+/* === NUMBER DICE MODE STYLES === */
+.dice-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  padding: 20px 0;
+}
+
+.dice-box {
+  width: 200px;
+  height: 200px;
+  background: #000;
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: border-color 0.2s ease;
+}
+
+.dice-number {
+  font-size: 80px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 2px;
+  font-family: 'Space Grotesk', monospace, sans-serif;
+  user-select: none;
+}
+
+.dice-box.rolling {
+  animation: dice-shake 0.1s infinite;
+  border-color: #fff;
+  box-shadow: 0 0 20px rgba(255,255,255,0.2);
+}
+
+@keyframes dice-shake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  25% { transform: translate(-1px, -2px) rotate(-1deg); }
+  50% { transform: translate(-3px, 0px) rotate(1deg); }
+  75% { transform: translate(3px, 2px) rotate(0deg); }
+  100% { transform: translate(1px, -1px) rotate(1deg); }
+}
+
+.dice-box.result-flash {
+  animation: dice-flash 0.5s ease;
+  border-color: #fff;
+}
+
+@keyframes dice-flash {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(255,255,255,0.4); }
+  100% { transform: scale(1); }
+}
+
+
+/* === DICE BLACKLIST OUTPUT - BELOW BOX ABOVE BUTTON === */
+.dice-blacklist-output {
+  width: 100%;
+  max-width: 320px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 10px 12px;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.dice-blacklist-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-family: 'Space Grotesk', monospace, sans-serif;
+}
+
+.dice-blacklist-list {
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  letter-spacing: 1px;
+  line-height: 1.4;
+  word-break: break-word;
+  font-family: 'Space Grotesk', monospace, sans-serif;
+  min-height: 20px;
+}
+
+.dice-blacklist-list.has-data {
+  color: #fff;
+  font-weight: 700;
+}
+
+.dice-blacklist-list.empty {
+  color: rgba(255,255,255,0.5);
+  font-style: italic;
+}
