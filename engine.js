@@ -124,10 +124,20 @@ document.addEventListener("DOMContentLoaded", () => {
       "mode-select-label": "MODE SPIN WHEEL",
       "opt-spin": "spin wheel",
       "opt-group": "give group",
+      "opt-dice": "number dice",
       "spinning-text": "SPINNING...",
       "placeholder-wheel-label": "judul spin wheel",
       "placeholder-wheel-items": "test 1\ntest 2",
       "btn-spin-action": "SPIN WHEEL",
+      "btn-dice-start": "START ROLL",
+      "dice-setting-title": "PENGATURAN DICE",
+      "dice-max-label": "ANGKA MAKSIMUM",
+      "dice-max-desc": "1 sampai max, contoh 20 = 1-20",
+      "dice-blacklist-label": "Blacklist yang sudah terpilih",
+      "dice-blacklist-desc": "Jika aktif, angka yang sudah keluar tidak akan keluar lagi",
+      "dice-blacklist-output-label": "Angka Blacklist:",
+      "dice-blacklist-empty": "Tidak ada",
+      "dice-blacklist-output-label-full": "Angka yang di Blacklist",
       "group-input-title": "GIVE GROUP INPUT",
       "trigger-label": "NAMA JUDUL",
       "placeholder-trigger": "Masukkan nama judul...",
@@ -136,6 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "btn-group-action": "GIVE GROUP",
       "setting-title": "System Configuration",
       "setting-star-label": "Aktifkan Bintang Jatuh",
+      "setting-music-label": "Aktifkan Music",
       "setting-lang-label": "BAHASA / LANGUAGE",
       "github-card-title": "Open Source Project",
       "github-card-desc": "Proyek ini bersifat open source. Anda dapat melihat, mempelajari, atau berkontribusi pada kode sumber melalui repositori GitHub kami di bawah ini:",
@@ -173,10 +184,20 @@ document.addEventListener("DOMContentLoaded", () => {
       "mode-select-label": "SPIN WHEEL MODE",
       "opt-spin": "spin wheel",
       "opt-group": "give group",
+      "opt-dice": "number dice",
       "spinning-text": "SPINNING...",
       "placeholder-wheel-label": "spin wheel title",
       "placeholder-wheel-items": "test 1\ntest 2",
       "btn-spin-action": "SPIN WHEEL",
+      "btn-dice-start": "START ROLL",
+      "dice-setting-title": "DICE SETTINGS",
+      "dice-max-label": "MAX NUMBER",
+      "dice-max-desc": "1 to max, e.g. 20 = 1-20",
+      "dice-blacklist-label": "Blacklist selected numbers",
+      "dice-blacklist-desc": "If active, rolled numbers won't appear again",
+      "dice-blacklist-output-label": "Blacklisted Numbers:",
+      "dice-blacklist-empty": "None",
+      "dice-blacklist-output-label-full": "Blacklisted Numbers",
       "group-input-title": "GIVE GROUP INPUT",
       "trigger-label": "TITLE NAME",
       "placeholder-trigger": "Enter title name...",
@@ -185,6 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "btn-group-action": "GIVE GROUP",
       "setting-title": "System Configuration",
       "setting-star-label": "Enable Shooting Stars",
+      "setting-music-label": "Enable Music",
       "setting-lang-label": "LANGUAGE / BAHASA",
       "github-card-title": "Open Source Project",
       "github-card-desc": "This project is open source. You can view, learn from, or contribute to the source code through our GitHub repository below:",
@@ -262,7 +284,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const customTrigger = document.getElementById('custom-lang-trigger');
     const customTriggerText = document.getElementById('custom-lang-trigger-text');
     const customOptionsContainer = document.getElementById('custom-lang-options');
-    // Scoped query to prevent tembus to other dropdowns
+    // Scoped query to prevent leaking to other dropdowns
     const customOptions = customOptionsContainer ? customOptionsContainer.querySelectorAll('.custom-dropdown-option') : document.querySelectorAll('#custom-lang-options .custom-dropdown-option');
 
     if (!customDropdown || !customTrigger || !customOptionsContainer || customOptions.length === 0) return;
@@ -381,6 +403,29 @@ document.addEventListener("DOMContentLoaded", () => {
   const modeSelect = document.getElementById("mode-select");
   const modeCardSpin = document.getElementById("mode-card-spin");
   const modeCardGroupContainer = document.getElementById("mode-card-group-container");
+  const modeCardDice = document.getElementById("mode-card-number-dice");
+
+  // Number Dice Elements
+  const diceBox = document.getElementById("dice-box");
+  const diceNumberDisplay = document.getElementById("dice-number-display");
+  const btnDiceRoll = document.getElementById("btn-dice-roll");
+  const btnDiceGear = document.getElementById("btn-dice-gear");
+  const diceSettingModal = document.getElementById("dice-setting-modal");
+  const btnDiceSettingClose = document.getElementById("btn-dice-setting-close");
+  const inputDiceMax = document.getElementById("input-dice-max");
+  const checkboxDiceBlacklist = document.getElementById("checkbox-dice-blacklist");
+  const btnResetDice = document.getElementById("btn-reset-dice");
+  const diceBlacklistOutput = document.getElementById("dice-blacklist-output");
+  const diceBlacklistList = document.getElementById("dice-blacklist-list");
+
+  // Dice State - MAX 20 + BLACKLIST
+  let diceMax = 6;
+  let diceCurrent = 1;
+  let diceIdleInterval = null;
+  let diceFastInterval = null;
+  let diceIsRolling = false;
+  let diceBlacklist = new Set();
+  let diceBlacklistEnabled = false;
 
   // Spin Wheel Canvas & Input Elements
   const canvas = document.getElementById("wheel-canvas");
@@ -513,12 +558,28 @@ document.addEventListener("DOMContentLoaded", () => {
   if (modeSelect && modeCardSpin && modeCardGroupContainer) {
     modeSelect.addEventListener("change", (e) => {
       const target = e.target;
+      const modeCardDice = document.getElementById("mode-card-number-dice");
       if (target.value === "spin-wheel") {
         modeCardSpin.style.display = "block";
         modeCardGroupContainer.style.display = "none";
-      } else {
+        if (modeCardDice) modeCardDice.style.display = "none";
+        stopDiceIdle();
+        const saveBtn = document.getElementById("btn-result-save");
+        if (saveBtn) saveBtn.style.display = "block";
+      } else if (target.value === "give-group") {
         modeCardSpin.style.display = "none";
         modeCardGroupContainer.style.display = "flex";
+        if (modeCardDice) modeCardDice.style.display = "none";
+        stopDiceIdle();
+        const saveBtn = document.getElementById("btn-result-save");
+        if (saveBtn) saveBtn.style.display = "block";
+      } else if (target.value === "number-dice") {
+        modeCardSpin.style.display = "none";
+        modeCardGroupContainer.style.display = "none";
+        if (modeCardDice) modeCardDice.style.display = "block";
+        startDiceIdle();
+        const saveBtn = document.getElementById("btn-result-save");
+        if (saveBtn) saveBtn.style.display = "none";
       }
       updateScrollBounds();
     });
@@ -526,7 +587,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   // ========================================================================
-  // Helper: Close all custom dropdowns to prevent tembus to other dropdowns
+  // Helper: Close all custom dropdowns to prevent leaking to other dropdowns
   // ========================================================================
   function closeAllCustomDropdowns(except = null) {
     document.querySelectorAll('.custom-dropdown.open').forEach(dd => {
@@ -544,7 +605,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const customTrigger = document.getElementById('custom-mode-trigger');
     const customTriggerText = document.getElementById('custom-mode-trigger-text');
     const customOptionsContainer = document.getElementById('custom-mode-options');
-    // Scoped query to prevent tembus to other dropdowns
+    // Scoped query to prevent leaking to other dropdowns
     const customOptions = customOptionsContainer ? customOptionsContainer.querySelectorAll('.custom-dropdown-option') : document.querySelectorAll('#custom-mode-options .custom-dropdown-option');
 
     if (!customDropdown || !customTrigger || !customOptionsContainer || customOptions.length === 0) return;
@@ -591,7 +652,7 @@ document.addEventListener("DOMContentLoaded", () => {
       customDropdown.classList.remove('open');
     }
 
-    // Trigger click toggles dropdown - close others to prevent tembus
+    // Trigger click toggles dropdown - close others to prevent leaking
     customTrigger.addEventListener('click', (e) => {
       e.stopPropagation();
       const isOpening = !customDropdown.classList.contains('open');
@@ -1477,7 +1538,517 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+
   setupModalOutsideClose();
+
+
+  // ========================================================================
+  // === EDITABLE MUSIC TOGGLE - PLACED AT THE VERY BOTTOM FOR EASY EDITING ===
+  // ========================================================================
+  // MUSIC FILES ARE LOCATED INSIDE AUDIO FOLDER
+  // audio/music.mp3 = background music (AUTO EXECUTE FIXED)
+  // audio/click.wav = sound for every button/checkbox click (FIXED SINGLE SOUND)
+  // FIX: muted autoplay to bypass browser block, then unmute
+  // ========================================================================
+  const MUSIC_CONFIG = {
+    src: "audio/music.mp3",
+    volume: 0.5,
+    loop: true
+  };
+
+  const CLICK_CONFIG = {
+    src: "audio/click.wav",
+    volume: 0.7
+  };
+
+  let bgMusic = null;
+  let fadeInterval = null;
+  let lastClickTime = 0;
+
+  function initBackgroundMusic() {
+    if (bgMusic) return bgMusic;
+    bgMusic = new Audio(MUSIC_CONFIG.src);
+    bgMusic.loop = MUSIC_CONFIG.loop;
+    bgMusic.volume = MUSIC_CONFIG.volume;
+    bgMusic.preload = "auto";
+    bgMusic.muted = false;
+    return bgMusic;
+  }
+
+  function playClickSound() {
+    const now = Date.now();
+    if (now - lastClickTime < 80) return;
+    lastClickTime = now;
+    try {
+      const audio = new Audio(CLICK_CONFIG.src);
+      audio.volume = CLICK_CONFIG.volume;
+      audio.play().catch(()=>{});
+    } catch(e) {}
+  }
+
+  function fadeOutAndPause(audio, duration = 800) {
+    if (!audio) return;
+    clearInterval(fadeInterval);
+    const steps = 20;
+    const stepTime = duration / steps;
+    const volumeStep = audio.volume / steps;
+    fadeInterval = setInterval(() => {
+      if (audio.volume > volumeStep) {
+        audio.volume = Math.max(0, audio.volume - volumeStep);
+      } else {
+        audio.volume = 0;
+        audio.pause();
+        clearInterval(fadeInterval);
+        audio.volume = MUSIC_CONFIG.volume;
+      }
+    }, stepTime);
+  }
+
+  function fadeInAndPlay(audio, duration = 500) {
+    if (!audio) return;
+    clearInterval(fadeInterval);
+    audio.volume = 0;
+    audio.play().catch(()=>{}).then(() => {
+      const steps = 20;
+      const stepTime = duration / steps;
+      const targetVol = MUSIC_CONFIG.volume;
+      const volumeStep = targetVol / steps;
+      let currentStep = 0;
+      fadeInterval = setInterval(() => {
+        currentStep++;
+        if (currentStep >= steps) {
+          audio.volume = targetVol;
+          clearInterval(fadeInterval);
+        } else {
+          audio.volume = Math.min(targetVol, audio.volume + volumeStep);
+        }
+      }, stepTime);
+    }).catch(()=>{});
+  }
+
+  // === FIXED AUTO EXECUTE music.mp3 - MUTED AUTOPLAY TRICK ===
+  const checkboxMusic = document.getElementById("checkbox-music");
+  
+  function autoPlayMusic() {
+    const m = initBackgroundMusic();
+    if (checkboxMusic && checkboxMusic.checked) {
+      m.muted = false;
+      m.volume = MUSIC_CONFIG.volume;
+      const p = m.play();
+      if (p !== undefined) {
+        p.then(() => {
+          console.log("Music auto-play success");
+        }).catch(() => {
+          console.log("Autoplay blocked, trying muted autoplay");
+          // Try muted autoplay then unmute on interaction
+          m.muted = true;
+          m.play().then(() => {
+            console.log("Muted autoplay success, waiting for interaction to unmute");
+            const unmuteOnInteraction = () => {
+              m.muted = false;
+              m.volume = MUSIC_CONFIG.volume;
+              document.removeEventListener("click", unmuteOnInteraction);
+              document.removeEventListener("keydown", unmuteOnInteraction);
+              document.removeEventListener("touchstart", unmuteOnInteraction);
+            };
+            document.addEventListener("click", unmuteOnInteraction);
+            document.addEventListener("keydown", unmuteOnInteraction);
+            document.addEventListener("touchstart", unmuteOnInteraction);
+          }).catch(()=>{});
+        });
+      }
+    }
+  }
+
+  // Attempt immediate
+  autoPlayMusic();
+  setTimeout(autoPlayMusic, 300);
+  setTimeout(autoPlayMusic, 1000);
+  window.addEventListener("load", () => {
+    setTimeout(autoPlayMusic, 200);
+    setTimeout(autoPlayMusic, 800);
+  });
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(autoPlayMusic, 100);
+  });
+
+  const firstInteractionPlay = () => {
+    if (checkboxMusic && checkboxMusic.checked && bgMusic) {
+      if (bgMusic.paused) {
+        bgMusic.muted = false;
+        bgMusic.volume = MUSIC_CONFIG.volume;
+        bgMusic.play().catch(()=>{});
+      } else if (bgMusic.muted) {
+        bgMusic.muted = false;
+        bgMusic.volume = MUSIC_CONFIG.volume;
+      }
+    }
+  };
+  document.addEventListener("click", firstInteractionPlay);
+  document.addEventListener("keydown", firstInteractionPlay);
+  document.addEventListener("touchstart", firstInteractionPlay);
+  document.addEventListener("mousemove", () => {
+    firstInteractionPlay();
+  }, { once: true });
+
+  if (checkboxMusic) {
+    checkboxMusic.addEventListener("change", (e) => {
+      const isChecked = e.target.checked;
+      const music = initBackgroundMusic();
+      clearInterval(fadeInterval);
+      if (isChecked) {
+        music.muted = false;
+        if (music.paused) {
+          music.volume = 0;
+          music.play().catch(()=>{}).then(() => {
+            fadeInAndPlay(music, 600);
+          });
+        } else {
+          fadeInAndPlay(music, 400);
+        }
+      } else {
+        if (!music.paused) {
+          fadeOutAndPause(music, 800);
+        }
+      }
+    });
+  }
+
+  let clickSoundSetupDone = false;
+  function setupClickSoundsFixed() {
+    if (clickSoundSetupDone) return;
+    clickSoundSetupDone = true;
+    document.addEventListener("click", (e) => {
+      const isButton = e.target.closest("button");
+      const isCheckbox = e.target.closest('input[type="checkbox"]');
+      const isLabel = e.target.closest(".checkbox-container");
+      const isOption = e.target.closest(".custom-dropdown-option");
+      if (isButton || isCheckbox || isLabel || isOption) {
+        playClickSound();
+      }
+    }, true);
+  }
+  setupClickSoundsFixed();
+
+  document.addEventListener("visibilitychange", () => {
+    if (!checkboxMusic || !bgMusic) return;
+    if (document.hidden) {
+      if (!bgMusic.paused) bgMusic.pause();
+    } else {
+      if (checkboxMusic.checked && bgMusic.paused) {
+        bgMusic.muted = false;
+        bgMusic.volume = MUSIC_CONFIG.volume;
+        bgMusic.play().catch(()=>{});
+      }
+    }
+  });
+  // === END EDITABLE MUSIC TOGGLE ===
+
+  // ========================================================================
+  // === NUMBER DICE SYSTEM ===
+  // ========================================================================
+  // Idle: 1 -> max -> 1 loop with speed 0.5 second per number
+  // Roll: 1 -> max loop with speed 0.05 second per number (very fast), instant stop
+  // ========================================================================
+
+  function updateDiceDisplay(num) {
+    if (diceNumberDisplay) {
+      diceNumberDisplay.textContent = num;
+    }
+  }
+
+  function getAvailableNumbers() {
+    const available = [];
+    for (let i = 1; i <= diceMax; i++) {
+      if (!diceBlacklistEnabled || !diceBlacklist.has(i)) {
+        available.push(i);
+      }
+    }
+    return available;
+  }
+
+  function getNextDiceNumber(current) {
+    let next = current + 1;
+    if (next > diceMax) next = 1;
+    if (diceBlacklistEnabled) {
+      let attempts = 0;
+      while (diceBlacklist.has(next) && attempts < diceMax) {
+        next++;
+        if (next > diceMax) next = 1;
+        attempts++;
+      }
+      if (diceBlacklist.has(next)) return null;
+    }
+    return next;
+  }
+
+  function startDiceIdle() {
+    stopDiceIdle();
+    if (!diceNumberDisplay) return;
+    if (diceIsRolling) return;
+    const available = getAvailableNumbers();
+    if (available.length === 0) {
+      diceCurrent = 1;
+      updateDiceDisplay("-");
+      return;
+    }
+    diceCurrent = available[0];
+    updateDiceDisplay(diceCurrent);
+    diceIdleInterval = setInterval(() => {
+      const next = getNextDiceNumber(diceCurrent);
+      if (next === null) {
+        clearInterval(diceIdleInterval);
+        diceIdleInterval = null;
+        updateDiceDisplay("-");
+        return;
+      }
+      diceCurrent = next;
+      updateDiceDisplay(diceCurrent);
+    }, 500);
+  }
+
+  function stopDiceIdle() {
+    if (diceIdleInterval) {
+      clearInterval(diceIdleInterval);
+      diceIdleInterval = null;
+    }
+  }
+
+  function updateDiceRefreshButton() {
+    if (!btnResetDice) return;
+    if (diceBlacklistEnabled && diceBlacklist.size > 0) {
+      btnResetDice.style.display = "flex";
+    } else if (diceBlacklistEnabled) {
+      btnResetDice.style.display = "flex";
+    } else {
+      btnResetDice.style.display = "none";
+    }
+    updateDiceBlacklistDisplay();
+    if (typeof lucide !== "undefined" && lucide.createIcons) {
+      lucide.createIcons();
+    }
+  }
+
+  function updateDiceBlacklistDisplay() {
+    if (!diceBlacklistList || !diceBlacklistOutput) return;
+    const dict = translations[currentLang] || translations['en'];
+    if (!diceBlacklistEnabled) {
+      diceBlacklistOutput.style.display = "none";
+      return;
+    }
+    diceBlacklistOutput.style.display = "block";
+    if (diceBlacklist.size === 0) {
+      diceBlacklistList.textContent = dict['dice-blacklist-empty'] || "None";
+      diceBlacklistList.className = "dice-blacklist-list empty";
+    } else {
+      const sorted = Array.from(diceBlacklist).sort((a,b)=>a-b);
+      diceBlacklistList.textContent = sorted.join(", ");
+      diceBlacklistList.className = "dice-blacklist-list has-data";
+    }
+  }
+
+  function startDiceFastRoll() {
+    if (diceIsRolling) return;
+    if (!diceNumberDisplay || !diceBox || !btnDiceRoll) return;
+    
+    const available = getAvailableNumbers();
+    if (available.length === 0) {
+      if (resultTextDisplay && resultModal) {
+        resultTextDisplay.textContent = "All numbers blacklisted! Clear blacklist.";
+        resultModal.classList.add("show");
+      }
+      return;
+    }
+    
+    diceIsRolling = true;
+    stopDiceIdle();
+    btnDiceRoll.disabled = true;
+    btnDiceRoll.textContent = "ROLLING...";
+    diceBox.classList.add("rolling");
+    diceBox.classList.remove("result-flash");
+
+    let fastCurrent = diceCurrent;
+
+    diceFastInterval = setInterval(() => {
+      let next = fastCurrent + 1;
+      if (next > diceMax) next = 1;
+      if (diceBlacklistEnabled) {
+        let attempts = 0;
+        while (diceBlacklist.has(next) && attempts < diceMax) {
+          next++;
+          if (next > diceMax) next = 1;
+          attempts++;
+        }
+      }
+      fastCurrent = next;
+      updateDiceDisplay(fastCurrent);
+      diceCurrent = fastCurrent;
+    }, 50);
+
+    const rollDuration = 2000 + Math.random() * 1000;
+
+    setTimeout(() => {
+      clearInterval(diceFastInterval);
+      diceFastInterval = null;
+      
+      const availableFinal = getAvailableNumbers();
+      let finalNumber;
+      if (availableFinal.length === 0) {
+        finalNumber = diceCurrent;
+      } else {
+        finalNumber = availableFinal[Math.floor(Math.random() * availableFinal.length)];
+      }
+      
+      diceCurrent = finalNumber;
+      updateDiceDisplay(finalNumber);
+      
+      if (diceBlacklistEnabled) {
+        diceBlacklist.add(finalNumber);
+        updateDiceRefreshButton();
+      }
+      
+      diceBox.classList.remove("rolling");
+      diceBox.classList.add("result-flash");
+      
+      setTimeout(() => {
+        diceBox.classList.remove("result-flash");
+      }, 500);
+
+      diceIsRolling = false;
+      btnDiceRoll.disabled = false;
+      const dict = translations[currentLang] || translations['en'];
+      btnDiceRoll.textContent = dict['btn-dice-start'] || "START ROLL";
+
+      if (resultTextDisplay && resultModal) {
+        resultTextDisplay.textContent = finalNumber.toString();
+        resultModal.classList.add("show");
+        // Hide save button for dice mode
+        const saveBtn = document.getElementById("btn-result-save");
+        if (saveBtn) saveBtn.style.display = "none";
+      }
+
+      setTimeout(() => {
+        if (getAvailableNumbers().length > 0) {
+          startDiceIdle();
+        }
+      }, 2500);
+    }, rollDuration);
+  }
+
+  function setupDiceEvents() {
+    if (btnDiceRoll) {
+      btnDiceRoll.addEventListener("click", () => {
+        if (!diceIsRolling) {
+          startDiceFastRoll();
+        }
+      });
+    }
+
+    if (btnResetDice) {
+      btnResetDice.addEventListener("click", () => {
+        diceBlacklist.clear();
+        updateDiceRefreshButton();
+        if (modeCardDice && modeCardDice.style.display !== "none") {
+          stopDiceIdle();
+          diceCurrent = 1;
+          updateDiceDisplay(diceCurrent);
+          startDiceIdle();
+        }
+      });
+    }
+
+    if (checkboxDiceBlacklist) {
+      checkboxDiceBlacklist.addEventListener("change", (e) => {
+        diceBlacklistEnabled = e.target.checked;
+        updateDiceRefreshButton();
+        if (modeCardDice && modeCardDice.style.display !== "none") {
+          stopDiceIdle();
+          startDiceIdle();
+        }
+      });
+    }
+
+    if (btnDiceGear && diceSettingModal) {
+      btnDiceGear.addEventListener("click", () => {
+        if (inputDiceMax) inputDiceMax.value = diceMax;
+        if (checkboxDiceBlacklist) checkboxDiceBlacklist.checked = diceBlacklistEnabled;
+        diceSettingModal.classList.add("show");
+      });
+    }
+
+    if (btnDiceSettingClose && diceSettingModal) {
+      btnDiceSettingClose.addEventListener("click", () => {
+        if (inputDiceMax) {
+          const val = parseInt(inputDiceMax.value);
+          if (!isNaN(val) && val >= 2 && val <= 20) {
+            diceMax = val;
+            if (diceBlacklist.size > 0) {
+              const newBlacklist = new Set();
+              diceBlacklist.forEach(num => {
+                if (num <= diceMax) newBlacklist.add(num);
+              });
+              diceBlacklist = newBlacklist;
+            }
+            diceCurrent = 1;
+            updateDiceDisplay(diceCurrent);
+            stopDiceIdle();
+            if (modeCardDice && modeCardDice.style.display !== "none") {
+              startDiceIdle();
+            }
+            updateDiceRefreshButton();
+          }
+        }
+        if (checkboxDiceBlacklist) {
+          diceBlacklistEnabled = checkboxDiceBlacklist.checked;
+          updateDiceRefreshButton();
+        }
+        diceSettingModal.classList.remove("show");
+      });
+    }
+
+    if (diceSettingModal) {
+      diceSettingModal.addEventListener("click", (e) => {
+        if (e.target === diceSettingModal) {
+          diceSettingModal.classList.remove("show");
+        }
+      });
+    }
+
+    // Start idle if dice mode is active on load
+    const diceCard = document.getElementById("mode-card-number-dice");
+    if (diceCard && diceCard.style.display !== "none" && diceCard.style.display !== "") {
+      startDiceIdle();
+    } else {
+      updateDiceDisplay(1);
+    }
+    updateDiceRefreshButton();
+  }
+
+  // Call after DOM ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setupDiceEvents);
+  } else {
+    setupDiceEvents();
+  }
+
+  // Extend setupModalOutsideClose to also close dice modal
+  const originalSetupModalOutsideClose = setupModalOutsideClose;
+  const extendedSetupModalOutsideClose = function() {
+    originalSetupModalOutsideClose();
+    const modals = [diceSettingModal];
+    modals.forEach(modal => {
+      if (modal) {
+        modal.addEventListener("click", (e) => {
+          if (e.target === modal) modal.classList.remove("show");
+        });
+      }
+    });
+  };
+  // Replace call
+  setupModalOutsideClose = extendedSetupModalOutsideClose;
+
+
+
 
 
   // Initialize Lucide icons
