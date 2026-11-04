@@ -12,7 +12,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spinwheel - Space</title>
-  <link rel="icon" type="image/png" href="/icon.png" />
+  <link rel="icon" type="image/png" href="/icon.jpg" />
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -94,6 +94,7 @@
             <select id="mode-select" class="mode-select" style="display: none;">
               <option value="spin-wheel" selected data-i18n="opt-spin">spin wheel</option>
               <option value="give-group" data-i18n="opt-group">give group</option>
+              <option value="number-dice" data-i18n="opt-dice">number dice</option>
             </select>
             <!-- Custom Dropdown UI - White Corner, No Smooth Stroke -->
             <div class="custom-dropdown" id="custom-mode-dropdown">
@@ -104,6 +105,7 @@
               <div class="custom-dropdown-options" id="custom-mode-options">
                 <div class="custom-dropdown-option active" data-value="spin-wheel" data-i18n="opt-spin">spin wheel</div>
                 <div class="custom-dropdown-option" data-value="give-group" data-i18n="opt-group">give group</div>
+                <div class="custom-dropdown-option" data-value="number-dice" data-i18n="opt-dice">number dice</div>
               </div>
             </div>
           </div>
@@ -158,6 +160,31 @@ test 2</textarea>
           </div>
         </div>
 
+        <!-- NUMBER DICE MODE CONTAINER - NEW MODE - MAX 20 + BLACKLIST -->
+        <div id="mode-card-number-dice" class="space-card mode-content-card position-relative" style="display: none;">
+          <!-- Dice Configuration Gear Icon Button -->
+          <button class="card-gear-icon-only" id="btn-dice-gear" title="Dice Settings" type="button">
+            <i data-lucide="settings"></i>
+          </button>
+
+          <div class="dice-section">
+            <div class="dice-box" id="dice-box">
+              <span class="dice-number" id="dice-number-display">1</span>
+            </div>
+            <!-- Blacklist Output - Only visible when checkbox enabled -->
+            <div class="dice-blacklist-output" id="dice-blacklist-output" style="display: none;">
+              <div class="dice-blacklist-label" data-i18n="dice-blacklist-output-label">Angka Blacklist:</div>
+              <div class="dice-blacklist-list" id="dice-blacklist-list" data-i18n="dice-blacklist-empty">Tidak ada</div>
+            </div>
+            <div class="action-button-row" style="margin-top: 16px; width: 100%;">
+              <button class="card-btn square-icon-btn" id="btn-reset-dice" title="Delete All Blacklist" type="button" style="display: none;">
+                <i data-lucide="refresh-cw"></i>
+              </button>
+              <button class="card-btn spin-action-btn" id="btn-dice-roll" type="button" data-i18n="btn-dice-start">START ROLL</button>
+            </div>
+          </div>
+        </div>
+
         <!-- GIVE GROUP MODE CONTAINER -->
         <div id="mode-card-group-container" style="display: none; flex-direction: column; gap: 20px; width: 100%;">
 
@@ -208,6 +235,14 @@ test 3</textarea>
               <label class="checkbox-container">
                 <input type="checkbox" id="checkbox-shooting-star" checked>
                 <span class="checkbox-label-text" data-i18n="setting-star-label">Aktifkan Bintang Jatuh</span>
+              </label>
+            </div>
+
+            <!-- Music Toggle Checkbox -->
+            <div class="setting-option-row">
+              <label class="checkbox-container">
+                <input type="checkbox" id="checkbox-music" checked>
+                <span class="checkbox-label-text" data-i18n="setting-music-label">Aktifkan Music</span>
               </label>
             </div>
 
@@ -307,6 +342,26 @@ test 3</textarea>
         <button class="card-btn" id="btn-percentage-reset" type="button" data-i18n="btn-reset">RESET</button>
         <button class="card-btn" id="btn-percentage-close" type="button" data-i18n="btn-close">CLOSE</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Number Dice Settings Modal Popup - MAX 20 + BLACKLIST CHECKBOX -->
+  <div class="result-modal" id="dice-setting-modal">
+    <div class="result-card">
+      <h2 class="card-title" data-i18n="dice-setting-title">DICE SETTINGS</h2>
+      <div class="setting-option-row" style="margin-bottom: 16px;">
+        <label class="mode-label" for="input-dice-max" style="margin-bottom: 8px;" data-i18n="dice-max-label">MAX NUMBER</label>
+        <input type="number" id="input-dice-max" class="wheel-card-title-input" value="6" min="2" max="20">
+        <p class="card-desc" style="font-size: 11px; margin-top: 6px; margin-bottom: 0;" data-i18n="dice-max-desc">1 to max, e.g. 20 = 1-20</p>
+      </div>
+      <div class="setting-option-row">
+        <label class="checkbox-container">
+          <input type="checkbox" id="checkbox-dice-blacklist">
+          <span class="checkbox-label-text" data-i18n="dice-blacklist-label">Blacklist yang sudah terpilih</span>
+        </label>
+        <p class="card-desc" style="font-size: 11px; margin-top: 6px; margin-bottom: 0;" data-i18n="dice-blacklist-desc">Jika aktif, angka yang sudah keluar tidak akan keluar lagi</p>
+      </div>
+      <button class="card-btn" id="btn-dice-setting-close" type="button" style="margin-top: 20px; width: 100%;" data-i18n="btn-apply-close">APPLY & CLOSE</button>
     </div>
   </div>
 
